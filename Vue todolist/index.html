@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>todos</title>
+    <link rel="stylesheet" type="text/css" href="css/base.css">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <script src="./vue.js"></script>
+</head>
+
+<body>
+    <section class="todoapp">
+        <div>
+            <header class="header" >
+                <h1>todos</h1>
+                <input v-model="str" 
+                class="new-todo" 
+                @keydown="tianjia"
+                placeholder="请输入内容" />
+            </header>
+            <section class="main">
+                <input class="toggle-all"
+                @click="clickAll"
+                v-model="selectAll"
+                type="checkbox" />
+                <ul class="todo-list">
+                    <li 
+                    v-for="item,index in list"
+                    @click="clickLi(index,$event)"
+                    v-bind:class="item.liStatus">
+                        <div class="view">
+                            <input 
+                            @click="clickOne(index)"
+                            v-model="item.select" 
+                            class="toggle" type="checkbox" />
+                            <label
+                            
+                            >{{item.title}}</label>
+                            <button 
+                            @click="delet(index)"
+                            class="destroy"></button>
+                        </div>
+                        
+                        <input class="edit" 
+                        ref="r" 
+                        @blur="blurOne(index,$event)"
+                        v-model="strOne"/>
+                    </li>
+                </ul>
+            </section>
+            <footer class="footer">
+	            <span class="todo-count">
+	            	<strong>{{list.filter((item)=>item.select==false).length}}</strong>
+	            	<span>条未选中</span>
+	            </span>
+                <ul class="filters">
+	            	<li v-for="item,index in selecteds">
+                        <a :href="item.src" 
+                        @click="handle(index,$event)"
+                        v-bind:class="item.selected">{{item.con}}</a></li> 
+	           	</ul>
+            </footer>
+        </div>
+    </section>
+</body>
+<script>
+    /*
+    
+
+		1. 增删改查数据，要使用localStorage做数据持久化
+		2. 根据hash不同，过滤渲染的数据
+			a. 全部任务
+			b. 完成的任务
+			c. 未完成的任务
+		3. 自己设计数据结构
+			
+	*/
+  //---------------------数据-----------------------------
+    let list = [
+        {
+            id:1,
+            title: 'hello',
+            select: false,
+            liStatus:{
+                completed:true,
+                 editing:false
+            }
+        },
+        {
+            id:2,
+            title: 'hello123',
+            select: true,
+            liStatus:{
+                completed:true,
+                 editing:false
+            }
+        }
+       
+    ];
+   
+    //本地存储时要转为JSON格式的字符串
+    localStorage.setItem("list",JSON.stringify(list));
+    
+    let selecteds = [{
+        selected:{selected:true},
+        src:' #/all',
+        con:'All'
+    },
+        {selected:{selected:false},
+        src:'#/active',
+        con:'Active'
+        },
+        {selected:{selected:false},
+        src:' #/completed',
+        con:'Completed'}];
+        
+        //-------------------------------------------------
+    let vm = new Vue({
+        el:'.todoapp',
+        data:{
+            list:JSON.parse(localStorage.getItem("list")),
+            selectAll:false,
+            str:'',
+            strOne:'',
+            selecteds:selecteds,
+            storage:window.localStorage
+        },
+        methods:{
+            tianjia:function(e){//添加一项数据
+            if (window.location.hash.slice(2) ==='completed') {
+                alert('不能在已完成中添加');
+                this.str = '';
+                return;
+            }
+                if (e.keyCode===13 && this.str !== '') {
+                  this.list.push({
+                    id:Date.now(),
+                    title: this.str,
+                    select: false,
+                    liStatus:{
+                    completed:true,
+                    editing:false
+            }
+                  })
+                }
+                this.str = '';
+                e.target.focus();
+                this.selectAll = this.list.every((item)=>item.select);
+                localStorage.setItem("list",JSON.stringify(this.list));
+            },
+            clickOne:function(index){//单选
+                this.list[index].select = !this.list[index].select;
+                this.selectAll = this.list.every((item)=>item.select)
+                localStorage.setItem("list",JSON.stringify(this.list));
+            },
+            clickAll:function(){//全选
+                this.selectAll = !this.selectAll;
+                this.list.map((item)=>item.select=this.selectAll);
+                localStorage.setItem("list",JSON.stringify(this.list));
+            },
+            delet:function(index){//删除每一个
+                this.list.splice(index,1)
+                this.selectAll = this.list.every((item)=>item.select)
+                if (this.list.length===0) {
+                    this.selectAll=false;
+                }
+                localStorage.setItem("list",JSON.stringify(this.list));
+            },
+            clickLi:function(index,e){//点击li切换输入框
+                if (e.target.nodeName === 'LABEL') {
+                    this.list.forEach((item)=>item.liStatus={
+                    completed:true,
+                    editing:false
+                })
+                    this.list[index].liStatus={
+                    completed:false,
+                    editing:true
+                }
+                // 每一项的聚焦有问题(异步问题),需要加定时器
+                setTimeout(()=>{
+                    this.$refs.r[index].focus();
+                })
+               
+                }
+               
+            },
+            blurOne:function(index,e){//修改每一项
+                if (this.strOne) {
+                    this.list[index].title = this.strOne;
+                    this.strOne = '';
+                }
+                this.list[index].liStatus={
+                    completed:true,
+                    editing:false
+                }
+                localStorage.setItem("list",JSON.stringify(this.list));
+            },
+            handle:function(index,e){//跳转筛选内容
+                this.selecteds.forEach(item=>item.selected.selected=false)
+                this.selecteds[index].selected.selected = true;
+            console.log()
+            }
+        }
+    });
+    window.addEventListener("hashchange",function(){
+        let hash = window.location.hash.slice(2);
+    //    localStorage.getItem("list")
+        switch (hash) {
+            case 'all':
+            vm.list = JSON.parse(localStorage.getItem("list"))
+           
+                break; 
+            case 'completed'://已完成，true
+            vm.list = JSON.parse(localStorage.getItem("list")).filter(item=>item.select===true)
+                break;
+            case 'active': 
+            vm.list = JSON.parse(localStorage.getItem("list")).filter(item=>item.select===false)
+            
+                break;
+            default:
+            console.log('未找到')
+                break;
+        }
+        //更新数据
+    });
+   
+</script>
+</html>

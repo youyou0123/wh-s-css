@@ -1,0 +1,23 @@
+.yellow{
+background: yellow;
+}
+.red{
+    background: red;
+    }
+    .sty{
+        width:250px;
+        height:100px;
+        border:1px dashed red;
+        margin: 20px auto;
+    }
+    .sty input{
+        width: 40px;
+        height: 40px;
+    }
+    .cl{
+        position: absolute;
+        left: 48%;
+        top: 100px;
+        width: 50px;
+        height: 50px;
+    }

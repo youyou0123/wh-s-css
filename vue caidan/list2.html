@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+    p:hover{
+        background: pink;
+    }
+    </style>
+</head>
+<script src="./vue.js"></script>
+<body>
+    <div id="app">
+<div v-for="item,index in tabs">
+    <p 
+    @click="handle(index)"
+    >{{item.title}}</p>
+    <ul v-bind:style="{display:item.show?'block':'none'}" >
+            <li
+     v-for="item,index in item.list">{{item.content}}</li>
+        </ul>
+</div>
+    </div>
+    <script>
+        //互不影响的点击展开
+let data = {
+    tabs:[{title:'按钮1',
+                    list:[{content:'111'},{content:'111'},{content:'111'}]
+               
+                },
+                {
+                    title:'按钮2',
+                    list:[{content:'222'},{content:'222'},{content:'222'}]
+                  
+                },
+                {
+                    title:'按钮3',
+                    list:[{content:'333'},{content:'333'},{content:'333'}]
+                    
+                }]
+    };
+    data.tabs.forEach((item,index)=> item.show = false)
+       let v = new Vue({
+            el:'#app',
+            data:data,
+            methods:{
+                handle(index){
+                    data.tabs[index].show = !data.tabs[index].show;
+                }
+            }
+        })
+       
+        </script>
+</body>
+</html>

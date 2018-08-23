@@ -24,11 +24,11 @@ this.setState({
 		return (
 			<div>
 				{data.map((item, index) => {
-                    let bt = this.state.currentIndex===index?'yellow':'red';
+                    let bt = this.state.currentIndex === index ? 'yellow' : 'red';
 					return (
-                        <button key={index} 
-                        className={bt}
-                        onClick={this.handle.bind(this,index)}>
+                        <button key = {index} 
+                        className = {bt}
+                        onClick = {this.handle.bind(this, index)}>
 							{item.title}
 						</button>
 					);
@@ -36,9 +36,9 @@ this.setState({
 				{data.map((item, index) => {
                     let ul = this.state.currentIndex===index?'block':'none';
 					return (
-						<ul key={index} style={{display:ul}}>
+						<ul key={index} style = {{display:ul}}>
 							{item.list.map((item, index) => {
-								return <li key={index}>{item}</li>;
+								return <li key={ index }>{item}</li>;
 							})}
 						</ul>
 					);
